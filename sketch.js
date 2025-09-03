@@ -289,7 +289,7 @@ class CieShape {
   }
 }
 
-// === Draw helpers (단일 정의) ===
+// === Draw helpers ===
 function drawEllipse(x, y, w, h, col) {
   push(); translate(x,y); fill(col); ellipse(0,0,w,h); pop();
 }
@@ -319,9 +319,7 @@ function drawPetal(x,y,w,h,col){
   endShape(CLOSE); pop();
 }
 
-// === Color: LCh -> (근사) RGB ===
-// 전역 colorMode 부작용 방지용 push/pop
-// --- CIE LCh(ab) → sRGB(p5.Color) 정확 변환 (D65, sRGB) ---
+// === Color: LCh -> RGB ===
 function labColor(L, C, Hdeg) {
   // 1) LCh → Lab
   const h = (Hdeg % 360) * Math.PI / 180;
@@ -356,8 +354,7 @@ function labColor(L, C, Hdeg) {
   let Gl = -0.9689 * X + 1.8758 * Y + 0.0415 * Z;
   let Bl =  0.0557 * X - 0.2040 * Y + 1.0570 * Z;
 
-  // 간단한 색역(gamut) 클리핑/축소: 채널이 0..1 밖이면 C(채도)를 줄여 재시도
-  // (너무 쎈 C값에서 색이 튀는 걸 방지)
+  // gamut clipping
   let tries = 0;
   while ((Rl < 0 || Rl > 1 || Gl < 0 || Gl > 1 || Bl < 0 || Bl > 1) && C > 0 && tries < 5) {
     C *= 0.85;
@@ -383,7 +380,7 @@ function labColor(L, C, Hdeg) {
     tries++;
   }
 
-  // 4) sRGB 감마 보정
+  // 4) sRGB GAMMA
   function gamma(u) {
     return (u <= 0.0031308) ? 12.92 * u : 1.055 * Math.pow(u, 1/2.4) - 0.055;
   }
@@ -392,12 +389,12 @@ function labColor(L, C, Hdeg) {
   let G = gamma(Math.max(0, Math.min(1, Gl)));
   let B = gamma(Math.max(0, Math.min(1, Bl)));
 
-  // p5.Color 반환 (전역 colorMode 영향 방지)
+  // p5.Color 
   const r255 = Math.round(R * 255);
   const g255 = Math.round(G * 255);
   const b255 = Math.round(B * 255);
 
-  // p5의 전역 colorMode와 충돌하지 않게 안전하게 생성
+  // 
   push();
   colorMode(RGB, 255);
   const c = color(r255, g255, b255);
@@ -419,7 +416,7 @@ const UI = {
   fixedTheta: 180,
   fixedChroma: 100,
   isBackgroundFading: false,
-  bgFadeSpeed: 1  // ← 세미콜론(X), 마지막 항목엔 보통 콤마 없이 닫습니다
+  bgFadeSpeed: 1
 }; 
 
 
