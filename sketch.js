@@ -392,6 +392,34 @@ function labColor(L, C, Hdeg) {
   return c;
 }
 
+function mouseWheel(e) {
+  const dy = (typeof e.delta === 'number') ? e.delta : (e.deltaY || 0);
+
+  // 스텝 크기: Shift로 가속
+  const stepA = keyIsDown(SHIFT) ? 0.5 : 0.1;
+  const stepR = keyIsDown(SHIFT) ? 0.2 : 0.05;
+
+  if (keyIsDown(ALT)) {
+    // ALT: radiusStepBase 조절 (선택)
+    if (dy < 0) radiusStepBase = Math.min(3.0, radiusStepBase + stepR);
+    else        radiusStepBase = Math.max(1.0, radiusStepBase - stepR);
+
+    UI.radiusStepBase = radiusStepBase;
+    if (typeof ctrlRadius?.updateDisplay === 'function') ctrlRadius.updateDisplay();
+  } else {
+    // 기본: angleStepBase 조절
+    if (dy < 0) angleStepBase = Math.min(6.0, angleStepBase + stepA);
+    else        angleStepBase = Math.max(1.5, angleStepBase - stepA);
+
+    UI.angleStepBase = angleStepBase;
+    if (typeof ctrlAngle?.updateDisplay === 'function') ctrlAngle.updateDisplay();
+  }
+
+  generateCircles();
+  return false; // prevent page scroll 
+}
+
+
 
 
 const UI = {
@@ -410,16 +438,27 @@ const UI = {
 }; 
 
 
-  // dat.GUI
+ // --- dat.GUI ---
 const gui = new dat.GUI();
-gui.add(UI, 'spiralModeIndex', { Linear: 0, Golden: 1, Double: 2, Wave: 3 })
+
+const ctrlSpiral = gui.add(UI, 'spiralModeIndex', { Linear: 0, Golden: 1, Double: 2, Wave: 3 })
   .onChange(v => { spiralModeIndex = Number(v); generateCircles(); });
 
-gui.add(UI, 'shapeIndex', -1, 5, 1).name('shapeIndex (-1=All)')
+const ctrlShape = gui.add(UI, 'shapeIndex', -1, 5, 1).name('shapeIndex (-1=All)')
   .onChange(v => { shapeIndex = Number(v); generateCircles(); });
 
-gui.add(UI, 'shadowModeIndex', { Horizontal: 0, Angular: 1, Rotation: 2, Wave: 3 })
+const ctrlShadow = gui.add(UI, 'shadowModeIndex', { Horizontal: 0, Angular: 1, Rotation: 2, Wave: 3 })
   .onChange(v => { shadowModeIndex = Number(v); generateCircles(); });
+
+// 👉 컨트롤러 참조 저장 (휠로 값 바꿀 때 표시를 갱신하기 위함)
+const ctrlTotal   = gui.add(UI, 'totalShapes', 36, 800, 1)
+  .onFinishChange(v => { totalShapes = v; generateCircles(); });
+
+const ctrlAngle   = gui.add(UI, 'angleStepBase', 1.5, 6.0, 0.1)
+  .onFinishChange(v => { angleStepBase = v; generateCircles(); });
+
+const ctrlRadius  = gui.add(UI, 'radiusStepBase', 1.0, 3.0, 0.1)
+  .onFinishChange(v => { radiusStepBase = v; generateCircles(); });
 
 gui.add(UI, 'totalShapes', 36, 800, 1)
   .onFinishChange(v => { totalShapes = v; generateCircles(); });
