@@ -88,11 +88,17 @@ function mouseMoved() {
 }
 
 function generateCircles() {
+  spiralModeIndex  = Number(spiralModeIndex);
+  shadowModeIndex  = Number(shadowModeIndex);
+  shapeIndex       = Number(shapeIndex);
+
   circles.length = 0;
 
   const centerX = width / 2;
   const centerY = height / 2;
-  const types = (shapeIndex === -1) ? shapeNames : [shapeNames[shapeIndex]];
+  const types = (shapeIndex === -1 || !shapeNames[shapeIndex])
+  ? shapeNames
+  : [shapeNames[shapeIndex]];
   const startRadius = 30;
 
   const cols = int(sqrt(totalShapes));
@@ -229,8 +235,8 @@ function generateCircles() {
       x, y, dynamicRx, dynamicRy, L, chromaV, hueDeg,
       rotAngle, shapeType, leftShadowColor, rightShadowColor
     ));
-  } // ← for (let i...) 닫힘
-}   // ← function generateCircles 닫힘
+  }
+} 
 
 // === Class ===
 class CieShape {
@@ -423,13 +429,13 @@ const UI = {
   // dat.GUI
 const gui = new dat.GUI();
 gui.add(UI, 'spiralModeIndex', { Linear: 0, Golden: 1, Double: 2, Wave: 3 })
-  .onChange(v => { spiralModeIndex = v; generateCircles(); });
+  .onChange(v => { spiralModeIndex = Number(v); generateCircles(); });
 
 gui.add(UI, 'shapeIndex', -1, 5, 1).name('shapeIndex (-1=All)')
-  .onChange(v => { shapeIndex = v; generateCircles(); });
+  .onChange(v => { shapeIndex = Number(v); generateCircles(); });
 
 gui.add(UI, 'shadowModeIndex', { Horizontal: 0, Angular: 1, Rotation: 2, Eye: 3, Wave: 4 })
-  .onChange(v => { shadowModeIndex = v; generateCircles(); });
+  .onChange(v => { shadowModeIndex = Number(v); generateCircles(); });
 
 gui.add(UI, 'totalShapes', 36, 800, 1)
   .onFinishChange(v => { totalShapes = v; generateCircles(); });
