@@ -22,7 +22,7 @@ let spiralModeIndex = 0;
 const shapeNames = ["Droplet", "Ellipse", "Circle", "Diamond", "Star", "Petal"];
 let shapeIndex = -1; // -1 = All
 
-const shadowModes = ["Horizontal (Y)", "Angular", "Rotation-Based", "Eye-Based", "Wave"];
+const shadowModes = ["Horizontal (Y)", "Angular", "Rotation-Based", "Wave"];
 let shadowModeIndex = 0;
 
 let angleStepBase = 2.5;
@@ -33,13 +33,10 @@ let shadowShiftPhase = 1.0;
 let shadowShiftSpeed = 0.05;
 let shadowDirectionIncreasing = true;
 
-let eyeVector = null;
-
 function setup() {
   createCanvas(1500, 800);
   pixelDensity(1);
   smooth();
-  eyeVector = createVector(1, 0);
   generateCircles();
 }
 
@@ -77,19 +74,10 @@ function mousePressed() {
   }
 }
 
-function mouseMoved() {
-  const dir = createVector(mouseX - width / 2, mouseY - height / 2);
-  if (dir.mag() > 0.01) {
-    eyeVector = dir.normalize();
-    if (shadowModeIndex === 3) {
-      generateCircles();
-    }
-  }
-}
-
 function generateCircles() {
   spiralModeIndex  = Number(spiralModeIndex);
-  shadowModeIndex  = Number(shadowModeIndex);
+  shadowModeIndex = Number(shadowModeIndex);
+  if (shadowModeIndex < 0 || shadowModeIndex > 3) shadowModeIndex = 0;
   shapeIndex       = Number(shapeIndex);
 
   circles.length = 0;
@@ -182,31 +170,27 @@ function generateCircles() {
       dynamicRy = ry * s;
     }
 
-    // shadow colors
+    // shadow color + transition
     let leftShadowColor = color(0);
     let rightShadowColor = color(255);
-
-    if (shadowModeIndex === 0) {
+    
+    if (shadowModeIndex === 0) {            // Horizontal (Y)
       const above = y < height / 2;
       leftShadowColor  = (above !== isShadowInverted) ? color(0) : color(255);
       rightShadowColor = (above !== isShadowInverted) ? color(255) : color(0);
-    } else if (shadowModeIndex === 1) {
+    } else if (shadowModeIndex === 1) {     // Angular
       const angCond = (angle % TWO_PI) < PI;
       leftShadowColor  = (angCond !== isShadowInverted) ? color(0) : color(255);
       rightShadowColor = (angCond !== isShadowInverted) ? color(255) : color(0);
-    } else if (shadowModeIndex === 2) {
+    } else if (shadowModeIndex === 2) {     // Rotation-Based
       const cosCond = cos(angle) > 0;
       leftShadowColor  = (cosCond !== isShadowInverted) ? color(0) : color(255);
       rightShadowColor = (cosCond !== isShadowInverted) ? color(255) : color(0);
-    } else if (shadowModeIndex === 3) {
-      const dir = createVector(x - width / 2, y - height / 2).normalize();
-      const dotCond = p5.Vector.dot(dir, eyeVector) > 0;
-      leftShadowColor  = (dotCond !== isShadowInverted) ? color(0) : color(255);
-      rightShadowColor = (dotCond !== isShadowInverted) ? color(255) : color(0);
-    } else if (shadowModeIndex === 4) {
+    } else if (shadowModeIndex === 3) {     // Wave (배경 페이드 기반)
       leftShadowColor  = isShadowInverted ? color(255) : color(0);
       rightShadowColor = isShadowInverted ? color(0) : color(255);
     }
+    
 
     const shapeType = types[i % types.length];
     let L;
@@ -434,7 +418,7 @@ gui.add(UI, 'spiralModeIndex', { Linear: 0, Golden: 1, Double: 2, Wave: 3 })
 gui.add(UI, 'shapeIndex', -1, 5, 1).name('shapeIndex (-1=All)')
   .onChange(v => { shapeIndex = Number(v); generateCircles(); });
 
-gui.add(UI, 'shadowModeIndex', { Horizontal: 0, Angular: 1, Rotation: 2, Eye: 3, Wave: 4 })
+gui.add(UI, 'shadowModeIndex', { Horizontal: 0, Angular: 1, Rotation: 2, Wave: 3 })
   .onChange(v => { shadowModeIndex = Number(v); generateCircles(); });
 
 gui.add(UI, 'totalShapes', 36, 800, 1)
