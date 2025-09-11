@@ -14,15 +14,18 @@ def index(request):
 def entry(request, title):
     content = util.get_entry(title)
     if content is None:
-        # Error page if not found
         return render(request, "encyclopedia/error.html", {
             "message": f"The page '{title}' was not found."
         }, status=404)
+
+    # Convert Markdown → HTML here
     html = markdown2.markdown(content)
+
     return render(request, "encyclopedia/entry.html", {
         "title": title,
         "content_html": html
     })
+
 
 def search(request):
     q = (request.GET.get("q") or "").strip()
