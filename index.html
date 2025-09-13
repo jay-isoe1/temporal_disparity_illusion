@@ -5,44 +5,69 @@
   <title>Shadow Illusion — p5.js</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./style.css" />
+  <style>
+    /* Floating glass-like explanation box, top-left */
+    details.explanation-box {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255, 255, 255, 0.7); /* translucent white */
+      color: #111;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      max-width: 320px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      backdrop-filter: blur(10px) saturate(150%);
+      -webkit-backdrop-filter: blur(10px) saturate(150%);
+      font-size: 0.9rem;
+      transition: all 0.25s ease;
+    }
+    details.explanation-box[open] {
+      max-height: 90vh; /* keeps from overflowing the viewport */
+      overflow-y: auto;
+    }
+    details.explanation-box summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      list-style: none;
+    }
+    details.explanation-box summary::-webkit-details-marker {
+      display: none; /* hide default triangle */
+    }
+    details.explanation-box summary::before {
+      content: "💡 ";
+      font-size: 1.1rem;
+    }
+  </style>
 </head>
 <body>
   <main id="app">
 
-    <!-- Upper-left explanation: when collapsed, only "Explanation" remains -->
-    <details open>
+    <!-- Floating, collapsible explanation box -->
+    <details class="explanation-box" open>
       <summary>Explanation</summary>
 
-      <h2>Layout & Math Overview</h2>
+      <h3>Layout & Math</h3>
 
-      <h3>1) Linear / Golden / Double</h3>
+      <p><strong>1) Linear / Golden / Double</strong></p>
       <p>\[
         \theta_i = i\,\Delta\theta,\quad
         r_i = r_{\text{start}} + i\,\Delta r,\quad
         x_i = x_c + r_i\cos\theta_i,\quad
         y_i = y_c + r_i\sin\theta_i.
       \]</p>
-      <p>\[
-        \theta_i^{(\mathrm{golden})} = i \cdot 137.5^\circ,\quad
-        r_i^{(\mathrm{golden})} = r_{\text{start}} + 1.5\,i
-      \]</p>
-      <p>\[
-        \mathrm{dir}_i=\begin{cases}+1&i\ \text{even}\\-1&i\ \text{odd}\end{cases},\quad
-        \theta_i^{(\mathrm{double})}=i\,\Delta\theta\,\mathrm{dir}_i
-      \]</p>
 
-      <h3>2) Wave (column-based sine)</h3>
+      <p><strong>2) Wave (column-based sine)</strong></p>
       <p>\[
         k=\frac{2\pi\cdot 4}{\text{cols}},\quad
         \phi_{\text{col}} = k\cdot \text{col},\quad
         y_{\text{offset}}=A\sin(\phi_{\text{col}})
       \]</p>
-      <p>\[
-        x_i=x_c+\bigl(\text{col}\cdot dx-\tfrac{(\text{cols}-1)dx}{2}\bigr),\quad
-        y_i=y_c+\bigl(\text{row}\cdot dy-\tfrac{(\text{rows}-1)dy}{2}\bigr)+y_{\text{offset}}
-      \]</p>
 
-      <h3>3) Lightness Mapping</h3>
+      <p><strong>3) Lightness Mapping</strong></p>
       <p>\[
         t=\frac{\text{col}}{\text{cols}-1},\quad
         L=
@@ -54,15 +79,15 @@
         \end{cases}
       \]</p>
 
-      <h3>4) Shadow Phase & Fade</h3>
+      <p><strong>4) Shadow Phase & Fade</strong></p>
       <p>\[
         \text{shadowShiftPhase} \leftarrow
         \mathrm{lerp}(\text{shadowShiftPhase},\ \pm 1,\ \text{shadowShiftSpeed})
       \]</p>
-      <p>Shadow polarity flips when background fade hits a bound: <code>fadeDirection *= -1</code></p>
+      <p><code>fadeDirection *= -1</code> flips shadow polarity at background limits.</p>
     </details>
 
-    <!-- p5 canvas will attach here -->
+    <!-- p5.js canvas container -->
     <div id="canvas-wrap"></div>
 
   </main>
@@ -71,10 +96,10 @@
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
   <!-- dat.GUI -->
   <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
-  <!-- your sketch -->
+  <!-- main sketch -->
   <script src="sketch.js"></script>
 
-  <!-- MathJax (for equations) -->
+  <!-- MathJax -->
   <script>
     window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] }, svg: { fontCache: 'global' } };
   </script>
