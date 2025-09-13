@@ -34,9 +34,9 @@ let shadowShiftSpeed = 0.05;
 let shadowDirectionIncreasing = true;
 
 function setup() {
-  createCanvas(1500, 800);
   const cnv = createCanvas(960, 600)
   cnv.parent('canvas-wrap')
+  createCanvas(1500, 800);
   pixelDensity(1);
   smooth();
   generateCircles();
