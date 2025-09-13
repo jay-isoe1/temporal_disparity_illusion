@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./style.css" />
   <style>
-    /* Floating glass card (closed by default) */
+    /* Floating glass card (collapsed initially) */
     details.explain-float {
       position: fixed;
       top: 16px;
@@ -27,8 +27,7 @@
     details.explain-float:hover {
       box-shadow: 0 18px 36px rgba(0,0,0,0.24);
     }
-
-    /* Header (drag handle) */
+    /* Header / drag handle */
     details.explain-float summary {
       display: flex;
       align-items: center;
@@ -41,65 +40,61 @@
     }
     details.explain-float summary:active { cursor: grabbing; }
     details.explain-float summary::-webkit-details-marker { display: none; }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #111;
-      opacity: .65;
-    }
-
-    /* Body content */
+    .dot { width: 8px; height: 8px; border-radius: 999px; background: #111; opacity: .65; }
+    /* Body */
     .explain-body {
       padding: 12px 14px 14px;
+      font-size: 0.85rem;
+      line-height: 1.45;
       max-height: min(64vh, 520px);
-      font-size: 0.8rem;
       overflow: auto;
       -webkit-overflow-scrolling: touch;
       user-select: text;
     }
-
-    /* Collapsed state styling */
-    details.explain-float:not([open]) {
-      opacity: 0.9;
-      width: auto;
-    }
+    .explain-body h3 { margin: 8px 0 4px; font-size: 0.95rem; }
+    .explain-body p { margin: 6px 0; }
+    /* Collapsed chip look */
+    details.explain-float:not([open]) { opacity: 0.9; width: auto; }
     details.explain-float:not([open]) summary {
       padding: 8px 10px;
       background: rgba(255,255,255,.6);
     }
-    details.explain-float:not([open]) .explain-body {
-      display: none;
-    }
+    details.explain-float:not([open]) .explain-body { display: none; }
   </style>
 </head>
 <body>
   <main id="app">
-    <!-- Floating card: starts CLOSED (no 'open' attribute) -->
+    <!-- Floating explanation card (starts collapsed) -->
     <details class="explain-float" id="explainCard">
       <summary id="explainHandle">
         <span class="dot"></span>
         Explanation
       </summary>
       <div class="explain-body">
-        <h3>Layout & Math</h3>
-
-        <p><strong>1) Linear / Golden / Double</strong></p>
+        <h3>1) Layout & Math</h3>
         <p>\[
           \theta_i = i\,\Delta\theta,\quad
           r_i = r_{\text{start}} + i\,\Delta r,\quad
           x_i = x_c + r_i\cos\theta_i,\quad
           y_i = y_c + r_i\sin\theta_i.
         \]</p>
-
-        <p><strong>2) Wave (column-based sine)</strong></p>
         <p>\[
-          k=\frac{2\pi\cdot 4}{\text{cols}},\quad
-          \phi_{\text{col}} = k\cdot \text{col},\quad
-          y_{\text{offset}}=A\sin(\phi_{\text{col}})
+          \theta_i^{(\mathrm{golden})} = i \cdot 137.5^\circ,\quad
+          r_i^{(\mathrm{golden})} = r_{\text{start}} + 1.5\,i
+        \]</p>
+        <p>\[
+          \mathrm{dir}_i=\begin{cases}+1&i\ \text{even}\\-1&i\ \text{odd}\end{cases},\quad
+          \theta_i^{(\mathrm{double})}=i\,\Delta\theta\,\mathrm{dir}_i
         \]</p>
 
-        <p><strong>3) Lightness Mapping</strong></p>
+        <h3>2) Wave Layout</h3>
+        <p>\[
+          k=\frac{2\pi\cdot 4}{\text{cols}},\quad
+          y_{\text{offset}}=A\sin(k\cdot \text{col})
+        \]</p>
+        <p>Applies a sinusoidal offset to rows to form a wave-like arrangement.</p>
+
+        <h3>3) Lightness Mapping</h3>
         <p>\[
           t=\frac{\text{col}}{\text{cols}-1},\quad
           L=
@@ -111,12 +106,26 @@
           \end{cases}
         \]</p>
 
-        <p><strong>4) Shadow Phase & Fade</strong></p>
+        <h3>4) Shadow Phase & Flip</h3>
         <p>\[
           \text{shadowShiftPhase} \leftarrow
           \mathrm{lerp}(\text{shadowShiftPhase},\ \pm 1,\ \text{shadowShiftSpeed})
         \]</p>
-        <p><code>fadeDirection *= -1</code> flips shadow polarity at background limits.</p>
+        <p>Flips polarity when <code>fadeDirection</code> reverses.</p>
+
+        <h3>5) Layout vs. Shadow Modes</h3>
+        <p>
+          <strong>Layout mode</strong> (<code>spiralModeIndex</code>) chooses where shapes are placed 
+          (Linear, Golden, Double spiral, or Wave grid).
+          <br><strong>Shadow mode</strong> (<code>shadowModeIndex</code>) chooses how black/white sides flip
+          (Horizontal, Angular, Rotation-based, Eye-based, or Wave).
+        </p>
+        <ul>
+          <li><strong>Wave + Wave:</strong> Shadows flip in sync with wave phase → smooth unified flow.</li>
+          <li><strong>Wave + Horizontal:</strong> Horizontal contrast stripes across the wavy layout.</li>
+          <li><strong>Linear + Angular:</strong> Shadows flip based on polar angle → radial illusion.</li>
+        </ul>
+        <p><em>Tip:</em> Matching Wave layout with Wave shadow creates the cleanest motion effect.</p>
       </div>
     </details>
 
@@ -131,13 +140,13 @@
   <!-- main sketch -->
   <script src="sketch.js"></script>
 
-  <!-- MathJax -->
+  <!-- MathJax for equations -->
   <script>
     window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] }, svg: { fontCache: 'global' } };
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
-  <!-- Drag behavior -->
+  <!-- Drag behavior for floating card -->
   <script>
     (() => {
       const card = document.getElementById('explainCard');
