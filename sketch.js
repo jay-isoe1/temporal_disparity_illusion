@@ -460,15 +460,6 @@ const ctrlAngle   = gui.add(UI, 'angleStepBase', 1.5, 6.0, 0.1)
 const ctrlRadius  = gui.add(UI, 'radiusStepBase', 1.0, 3.0, 0.1)
   .onFinishChange(v => { radiusStepBase = v; generateCircles(); });
 
-gui.add(UI, 'totalShapes', 36, 800, 1)
-  .onFinishChange(v => { totalShapes = v; generateCircles(); });
-
-gui.add(UI, 'angleStepBase', 1.5, 6.0, 0.1)
-  .onFinishChange(v => { angleStepBase = v; generateCircles(); });
-
-gui.add(UI, 'radiusStepBase', 1.0, 3.0, 0.1)
-  .onFinishChange(v => { radiusStepBase = v; generateCircles(); });
-
 gui.add(UI, 'useFixedColor')
   .onChange(v => { useFixedColor = v; });
 
