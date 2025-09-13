@@ -5,18 +5,155 @@
   <title>Shadow Illusion — p5.js</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./style.css" />
+  <style>
+    /* Basic inline styles (you can move them to style.css) */
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      line-height: 1.6;
+      margin: 0;
+    }
+    main { max-width: 1080px; margin: 0 auto; padding: 16px; }
+    #canvas-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 480px;
+      margin: 16px 0 24px;
+    }
+    /* Math / explanation section */
+    #math-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    #math-card h2 { font-size: 1.2rem; margin: 0 0 .5rem; }
+    details summary { cursor: pointer; font-weight: 600; margin: .25rem 0; }
+    details summary::marker { content: ''; } /* remove default marker */
+    details summary::before {
+      content: "▸"; display:inline-block; width:1em; transition: transform .2s ease;
+    }
+    details[open] summary::before { transform: rotate(90deg); }
+    #math-card .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: .5rem;
+    }
+    #toggle-all {
+      font: inherit;
+      padding: .3rem .6rem;
+      border: 1px solid #e5e7eb;
+      border-radius: .4rem;
+      background: #fff;
+      cursor: pointer;
+    }
+    #toggle-all:hover { background: #f3f4f6; }
+  </style>
 </head>
 <body>
-  <main id="app"></main>
+  <main id="app">
+    <!-- p5.js canvas will be attached here -->
+    <div id="canvas-wrap"></div>
 
-  <!-- p5.js -->
+    <!-- Explanation / Math Section -->
+    <aside id="math-card">
+      <div class="toolbar">
+        <button id="toggle-all" type="button">▼ Open all</button>
+      </div>
+
+      <h2>Layout & Math Overview</h2>
+
+      <details open>
+        <summary>1) Linear / Golden / Double</summary>
+        <p>\[
+          \theta_i = i\,\Delta\theta,\quad
+          r_i = r_{\text{start}} + i\,\Delta r,\quad
+          x_i = x_c + r_i\cos\theta_i,\quad
+          y_i = y_c + r_i\sin\theta_i.
+        \]</p>
+        <p>\[
+          \theta_i^{(\mathrm{golden})} = i \cdot 137.5^\circ,\quad
+          r_i^{(\mathrm{golden})} = r_{\text{start}} + 1.5\,i
+        \]</p>
+        <p>\[
+          \mathrm{dir}_i=\begin{cases}+1&i\ \text{even}\\-1&i\ \text{odd}\end{cases},\quad
+          \theta_i^{(\mathrm{double})}=i\,\Delta\theta\,\mathrm{dir}_i
+        \]</p>
+      </details>
+
+      <details>
+        <summary>2) Wave (column-based sine)</summary>
+        <p>\[
+          k=\frac{2\pi\cdot 4}{\text{cols}},\quad
+          \phi_{\text{col}} = k\cdot \text{col},\quad
+          y_{\text{offset}}=A\sin(\phi_{\text{col}})
+        \]</p>
+        <p>\[
+          x_i=x_c+\bigl(\text{col}\cdot dx-\tfrac{(\text{cols}-1)dx}{2}\bigr),\quad
+          y_i=y_c+\bigl(\text{row}\cdot dy-\tfrac{(\text{rows}-1)dy}{2}\bigr)+y_{\text{offset}}
+        \]</p>
+      </details>
+
+      <details>
+        <summary>3) Lightness Mapping</summary>
+        <p>\[
+          t=\frac{\text{col}}{\text{cols}-1},\quad
+          L=
+          \begin{cases}
+            30 & t<0.25\\
+            50 & 0.25\le t<0.50\\
+            70 & 0.50\le t<0.75\\
+            90 & 0.75\le t\le 1
+          \end{cases}
+        \]</p>
+      </details>
+
+      <details>
+        <summary>4) Shadow Phase & Fade</summary>
+        <p>\[
+          \text{shadowShiftPhase} \leftarrow
+          \mathrm{lerp}(\text{shadowShiftPhase},\ \pm 1,\ \text{shadowShiftSpeed})
+        \]</p>
+        <p>Shadow polarity flips when background fade reaches its limit: <code>fadeDirection *= -1</code></p>
+      </details>
+    </aside>
+  </main>
+
+  <!-- p5.js library -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
-  
-  <!-- dat.GUI -->
+  <!-- dat.GUI library -->
   <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
-  
-  <!-- main -->
+  <!-- main sketch -->
   <script src="sketch.js"></script>
 
+  <!-- MathJax for LaTeX rendering -->
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] }, svg: { fontCache: 'global' } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <!-- Toggle all open/close button logic -->
+  <script>
+    (function(){
+      const btn = document.getElementById('toggle-all');
+      const detailsList = document.querySelectorAll('#math-card details');
+
+      function setAll(open) {
+        detailsList.forEach(d => open ? d.setAttribute('open','') : d.removeAttribute('open'));
+        btn.textContent = open ? '▲ Collapse all' : '▼ Open all';
+        btn.dataset.state = open ? 'open' : 'closed';
+      }
+
+      setAll(true); // Start with all sections opened
+
+      btn.addEventListener('click', () => {
+        const nextOpen = btn.dataset.state !== 'open';
+        setAll(nextOpen);
+      });
+    })();
+  </script>
 </body>
 </html>
