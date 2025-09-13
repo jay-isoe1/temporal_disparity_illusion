@@ -6,97 +6,125 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./style.css" />
   <style>
-    /* Floating glass-like explanation box, top-left */
-    details.explanation-box {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      background: rgba(255, 255, 255, 0.7); /* translucent white */
+    /* Floating glass card */
+    details.explain-float {
+      position: fixed; top: 16px; left: 16px; z-index: 9999;
+      width: clamp(240px, 28vw, 360px);
+      background: rgba(255,255,255,0.75);
       color: #111;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 12px;
-      padding: 12px 16px;
-      max-width: 320px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      backdrop-filter: blur(10px) saturate(150%);
-      -webkit-backdrop-filter: blur(10px) saturate(150%);
-      font-size: 0.9rem;
-      transition: all 0.25s ease;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.20);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      overflow: hidden;
+      transition: box-shadow .25s ease, transform .25s ease, opacity .25s ease;
+      user-select: none; /* helps dragging */
     }
-    details.explanation-box[open] {
-      max-height: 90vh; /* keeps from overflowing the viewport */
-      overflow-y: auto;
+    details.explain-float:hover { box-shadow: 0 18px 36px rgba(0,0,0,0.24); }
+
+    /* Header (drag handle) */
+    details.explain-float summary {
+      display: flex; align-items: center; gap: 8px;
+      cursor: grab; padding: 10px 12px;
+      font-weight: 700; letter-spacing: .2px;
+      background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.35));
     }
-    details.explanation-box summary {
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-      list-style: none;
+    details.explain-float summary:active { cursor: grabbing; }
+    details.explain-float summary::-webkit-details-marker { display: none; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; background: #111; opacity: .65; }
+
+    /* Body */
+    .explain-body {
+      padding: 12px 14px 14px;
+      max-height: min(64vh, 520px);
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      user-select: text; /* allow text selection inside */
     }
-    details.explanation-box summary::-webkit-details-marker {
-      display: none; /* hide default triangle */
+    .explain-body h3 { margin: 8px 0 6px; font-size: 1rem; }
+    .explain-body p { margin: 6px 0; }
+
+    /* Collapsed look: tiny floating chip */
+    details.explain-float:not([open]) {
+      opacity: .92; transform: translateY(0);
+      width: auto;
     }
-    details.explanation-box summary::before {
-      content: "💡 ";
-      font-size: 1.1rem;
+    details.explain-float:not([open]) summary {
+      padding: 8px 10px;
+      background: rgba(255,255,255,.6);
     }
+    details.explain-float:not([open]) .explain-body { display: none; }
   </style>
 </head>
 <body>
   <main id="app">
+    <!-- Floating, collapsible, draggable explanation -->
+    <details class="explain-float" open id="explainCard">
+      <summary id="explainHandle">
+        <span class="dot"></span>
+        Explanation
+      </summary>
+      <div class="explain-body">
+        <h3>Layout & Math</h3>
 
-    <!-- Floating, collapsible explanation box -->
-    <details class="explanation-box" open>
-      <summary>Explanation</summary>
+        <p><strong>1) Linear / Golden / Double</strong></p>
+        <p>\[
+          \theta_i = i\,\Delta\theta,\quad
+          r_i = r_{\text{start}} + i\,\Delta r,\quad
+          x_i = x_c + r_i\cos\theta_i,\quad
+          y_i = y_c + r_i\sin\theta_i.
+        \]</p>
+        <p>\[
+          \theta_i^{(\mathrm{golden})} = i \cdot 137.5^\circ,\quad
+          r_i^{(\mathrm{golden})} = r_{\text{start}} + 1.5\,i
+        \]</p>
+        <p>\[
+          \mathrm{dir}_i=\begin{cases}+1&i\ \text{even}\\-1&i\ \text{odd}\end{cases},\quad
+          \theta_i^{(\mathrm{double})}=i\,\Delta\theta\,\mathrm{dir}_i
+        \]</p>
 
-      <h3>Layout & Math</h3>
+        <p><strong>2) Wave (column-based sine)</strong></p>
+        <p>\[
+          k=\frac{2\pi\cdot 4}{\text{cols}},\quad
+          \phi_{\text{col}} = k\cdot \text{col},\quad
+          y_{\text{offset}}=A\sin(\phi_{\text{col}})
+        \]</p>
+        <p>\[
+          x_i=x_c+\bigl(\text{col}\cdot dx-\tfrac{(\text{cols}-1)dx}{2}\bigr),\quad
+          y_i=y_c+\bigl(\text{row}\cdot dy-\tfrac{(\text{rows}-1)dy}{2}\bigr)+y_{\text{offset}}
+        \]</p>
 
-      <p><strong>1) Linear / Golden / Double</strong></p>
-      <p>\[
-        \theta_i = i\,\Delta\theta,\quad
-        r_i = r_{\text{start}} + i\,\Delta r,\quad
-        x_i = x_c + r_i\cos\theta_i,\quad
-        y_i = y_c + r_i\sin\theta_i.
-      \]</p>
+        <p><strong>3) Lightness Mapping</strong></p>
+        <p>\[
+          t=\frac{\text{col}}{\text{cols}-1},\quad
+          L=
+          \begin{cases}
+            30 & t<0.25\\
+            50 & 0.25\le t<0.50\\
+            70 & 0.50\le t<0.75\\
+            90 & 0.75\le t\le 1
+          \end{cases}
+        \]</p>
 
-      <p><strong>2) Wave (column-based sine)</strong></p>
-      <p>\[
-        k=\frac{2\pi\cdot 4}{\text{cols}},\quad
-        \phi_{\text{col}} = k\cdot \text{col},\quad
-        y_{\text{offset}}=A\sin(\phi_{\text{col}})
-      \]</p>
-
-      <p><strong>3) Lightness Mapping</strong></p>
-      <p>\[
-        t=\frac{\text{col}}{\text{cols}-1},\quad
-        L=
-        \begin{cases}
-          30 & t<0.25\\
-          50 & 0.25\le t<0.50\\
-          70 & 0.50\le t<0.75\\
-          90 & 0.75\le t\le 1
-        \end{cases}
-      \]</p>
-
-      <p><strong>4) Shadow Phase & Fade</strong></p>
-      <p>\[
-        \text{shadowShiftPhase} \leftarrow
-        \mathrm{lerp}(\text{shadowShiftPhase},\ \pm 1,\ \text{shadowShiftSpeed})
-      \]</p>
-      <p><code>fadeDirection *= -1</code> flips shadow polarity at background limits.</p>
+        <p><strong>4) Shadow Phase & Fade</strong></p>
+        <p>\[
+          \text{shadowShiftPhase} \leftarrow
+          \mathrm{lerp}(\text{shadowShiftPhase},\ \pm 1,\ \text{shadowShiftSpeed})
+        \]</p>
+        <p><code>fadeDirection *= -1</code> flips shadow polarity at background limits.</p>
+      </div>
     </details>
 
-    <!-- p5.js canvas container -->
+    <!-- p5 canvas attaches here -->
     <div id="canvas-wrap"></div>
-
   </main>
 
   <!-- p5.js -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
   <!-- dat.GUI -->
   <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
-  <!-- main sketch -->
+  <!-- your sketch -->
   <script src="sketch.js"></script>
 
   <!-- MathJax -->
@@ -104,5 +132,64 @@
     window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] }, svg: { fontCache: 'global' } };
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <!-- Tiny drag behavior for the floating card -->
+  <script>
+    (() => {
+      const card = document.getElementById('explainCard');
+      const handle = document.getElementById('explainHandle');
+
+      let dragging = false, startX = 0, startY = 0, startLeft = 16, startTop = 16;
+
+      const getNum = v => (typeof v === 'string' ? parseFloat(v.replace('px','')) : v);
+
+      const onDown = (e) => {
+        // Only start drag on left button / touch
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        dragging = true;
+        handle.style.cursor = 'grabbing';
+
+        const rect = card.getBoundingClientRect();
+        startLeft = rect.left + window.scrollX;
+        startTop  = rect.top  + window.scrollY;
+
+        const point = (e.touches && e.touches[0]) || e;
+        startX = point.clientX + window.scrollX;
+        startY = point.clientY + window.scrollY;
+
+        e.preventDefault();
+      };
+
+      const onMove = (e) => {
+        if (!dragging) return;
+        const point = (e.touches && e.touches[0]) || e;
+        const x = point.clientX + window.scrollX;
+        const y = point.clientY + window.scrollY;
+
+        let left = startLeft + (x - startX);
+        let top  = startTop  + (y - startY);
+
+        // Keep within viewport a bit
+        left = Math.max(8, Math.min(left, window.scrollX + window.innerWidth  - 80));
+        top  = Math.max(8, Math.min(top,  window.scrollY + window.innerHeight - 60));
+
+        card.style.left = left + 'px';
+        card.style.top  = top  + 'px';
+      };
+
+      const onUp = () => {
+        dragging = false;
+        handle.style.cursor = 'grab';
+      };
+
+      handle.addEventListener('mousedown', onDown, { passive: false });
+      window.addEventListener('mousemove', onMove, { passive: false });
+      window.addEventListener('mouseup', onUp, { passive: true });
+
+      handle.addEventListener('touchstart', onDown, { passive: false });
+      window.addEventListener('touchmove', onMove, { passive: false });
+      window.addEventListener('touchend', onUp, { passive: true });
+    })();
+  </script>
 </body>
 </html>
