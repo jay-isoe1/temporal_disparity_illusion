@@ -6,7 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./style.css" />
   <style>
-    /* Floating glass card (collapsed initially) */
+    /* Modern font stack: system UI + Arial fallback */
+    body, details.explain-float {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Floating glass card */
     details.explain-float {
       position: fixed;
       top: 16px;
@@ -24,9 +29,8 @@
       transition: box-shadow .25s ease, transform .25s ease, opacity .25s ease;
       user-select: none;
     }
-    details.explain-float:hover {
-      box-shadow: 0 18px 36px rgba(0,0,0,0.24);
-    }
+    details.explain-float:hover { box-shadow: 0 18px 36px rgba(0,0,0,0.24); }
+
     /* Header / drag handle */
     details.explain-float summary {
       display: flex;
@@ -34,13 +38,13 @@
       gap: 8px;
       cursor: grab;
       padding: 10px 12px;
-      font-weight: 700;
-      letter-spacing: .2px;
+      font-weight: 600;
       background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.35));
     }
     details.explain-float summary:active { cursor: grabbing; }
     details.explain-float summary::-webkit-details-marker { display: none; }
     .dot { width: 8px; height: 8px; border-radius: 999px; background: #111; opacity: .65; }
+
     /* Body */
     .explain-body {
       padding: 12px 14px 14px;
@@ -51,8 +55,9 @@
       -webkit-overflow-scrolling: touch;
       user-select: text;
     }
-    .explain-body h3 { margin: 8px 0 4px; font-size: 0.95rem; }
+    .explain-body h3 { margin: 8px 0 4px; font-size: 0.95rem; font-weight: 600; }
     .explain-body p { margin: 6px 0; }
+
     /* Collapsed chip look */
     details.explain-float:not([open]) { opacity: 0.9; width: auto; }
     details.explain-float:not([open]) summary {
@@ -64,7 +69,7 @@
 </head>
 <body>
   <main id="app">
-    <!-- Floating explanation card (starts collapsed) -->
+    <!-- Collapsed by default -->
     <details class="explain-float" id="explainCard">
       <summary id="explainHandle">
         <span class="dot"></span>
@@ -78,21 +83,12 @@
           x_i = x_c + r_i\cos\theta_i,\quad
           y_i = y_c + r_i\sin\theta_i.
         \]</p>
-        <p>\[
-          \theta_i^{(\mathrm{golden})} = i \cdot 137.5^\circ,\quad
-          r_i^{(\mathrm{golden})} = r_{\text{start}} + 1.5\,i
-        \]</p>
-        <p>\[
-          \mathrm{dir}_i=\begin{cases}+1&i\ \text{even}\\-1&i\ \text{odd}\end{cases},\quad
-          \theta_i^{(\mathrm{double})}=i\,\Delta\theta\,\mathrm{dir}_i
-        \]</p>
 
         <h3>2) Wave Layout</h3>
         <p>\[
           k=\frac{2\pi\cdot 4}{\text{cols}},\quad
           y_{\text{offset}}=A\sin(k\cdot \text{col})
         \]</p>
-        <p>Applies a sinusoidal offset to rows to form a wave-like arrangement.</p>
 
         <h3>3) Lightness Mapping</h3>
         <p>\[
@@ -113,40 +109,34 @@
         \]</p>
         <p>Flips polarity when <code>fadeDirection</code> reverses.</p>
 
-        <h3>5) Layout vs. Shadow Modes</h3>
+        <h3>5) Layout + Shadow Modes</h3>
         <p>
-          <strong>Layout mode</strong> (<code>spiralModeIndex</code>) chooses where shapes are placed 
-          (Linear, Golden, Double spiral, or Wave grid).
-          <br><strong>Shadow mode</strong> (<code>shadowModeIndex</code>) chooses how black/white sides flip
-          (Horizontal, Angular, Rotation-based, Eye-based, or Wave).
+          <strong>Layout</strong> (<code>spiralModeIndex</code>) decides shape positions (Linear, Golden, Double, Wave).
+          <br><strong>Shadow</strong> (<code>shadowModeIndex</code>) decides black/white sides 
+          (Horizontal, Angular, Rotation-based, Eye-based, Wave).
         </p>
         <ul>
-          <li><strong>Wave + Wave:</strong> Shadows flip in sync with wave phase → smooth unified flow.</li>
-          <li><strong>Wave + Horizontal:</strong> Horizontal contrast stripes across the wavy layout.</li>
-          <li><strong>Linear + Angular:</strong> Shadows flip based on polar angle → radial illusion.</li>
+          <li><strong>Wave + Wave:</strong> synchronized shadows → smooth flow.</li>
+          <li><strong>Wave + Horizontal:</strong> horizontal stripes across wavy layout.</li>
+          <li><strong>Linear + Angular:</strong> radial flips based on polar angle.</li>
         </ul>
-        <p><em>Tip:</em> Matching Wave layout with Wave shadow creates the cleanest motion effect.</p>
+        <p><em>Tip:</em> Pairing Wave layout with Wave shadow gives the clearest illusion.</p>
       </div>
     </details>
 
-    <!-- p5.js canvas attaches here -->
     <div id="canvas-wrap"></div>
   </main>
 
-  <!-- p5.js -->
+  <!-- p5.js + dat.GUI + MathJax -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
-  <!-- dat.GUI -->
   <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
-  <!-- main sketch -->
   <script src="sketch.js"></script>
-
-  <!-- MathJax for equations -->
   <script>
     window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] }, svg: { fontCache: 'global' } };
   </script>
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
-  <!-- Drag behavior for floating card -->
+  <!-- Drag behavior -->
   <script>
     (() => {
       const card = document.getElementById('explainCard');
@@ -168,10 +158,8 @@
       const onMove = (e) => {
         if (!dragging) return;
         const point = (e.touches && e.touches[0]) || e;
-        const x = point.clientX + window.scrollX;
-        const y = point.clientY + window.scrollY;
-        card.style.left = startLeft + (x - startX) + 'px';
-        card.style.top  = startTop  + (y - startY) + 'px';
+        card.style.left = startLeft + (point.clientX + window.scrollX - startX) + 'px';
+        card.style.top  = startTop  + (point.clientY + window.scrollY - startY) + 'px';
       };
       const onUp = () => { dragging = false; handle.style.cursor = 'grab'; };
 
