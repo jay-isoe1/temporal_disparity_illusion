@@ -4,18 +4,35 @@
   <meta charset="utf-8" />
   <title>Shadow Illusion — p5.js</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 선택: 별도 CSS가 있다면 유지 -->
   <link rel="stylesheet" href="./style.css" />
+
+  <style>
+    /* Modern font stack for crisp UI text */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      min-height: 100svh;
+    }
+
+    #canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
 </head>
-<body>
-  <main id="app"></main>
-
-  <!-- p5.js -->
-  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
   
-  <script src="sketch.js"></script>
+<body>
+  <main id="app">
+    <!-- p5 canvas goes here -->
+    <div id="canvas-wrap"></div>
+  </main>
 
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+  <script src="sketch.js"></script>
 </body>
 </html>
-
